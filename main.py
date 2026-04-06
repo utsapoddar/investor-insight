@@ -93,6 +93,15 @@ def main(dry_run: bool = False):
         commodities = FETCHER_REGISTRY["commodities"]["fn"](session)
         print(f"[main] Commodities: {commodities}")
 
+    # --- Fetch (custom feeds from config/feeds.csv) ---
+    if "feeds" in enabled_fetchers:
+        feed_news = FETCHER_REGISTRY["feeds"]["fn"](entities, session, since=start_date)
+        for entity_name, headlines in feed_news.items():
+            existing = news_by_entity.get(entity_name, [])
+            news_by_entity[entity_name] = existing + headlines
+        total = sum(len(v) for v in feed_news.values())
+        print(f"[main] Custom feeds: {total} headline(s) matched to entities")
+
     # --- Enrich ---
     enriched = enrich(form4_trades, thirteenf_results, crypto_deltas, news_by_entity)
 

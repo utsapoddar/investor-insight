@@ -19,6 +19,10 @@ fetchers:
     enabled: true
     description: "Yahoo Finance weekly commodity price changes"
 
+  feeds:
+    enabled: true
+    description: "Custom RSS feeds from config/feeds.csv"
+
 # Commodity symbols tracked (fetcher: commodities)
 commodities:
   Gold: "GC=F"

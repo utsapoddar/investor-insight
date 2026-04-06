@@ -3,6 +3,7 @@ from digest.fetchers.sec_edgar import fetch_form4, fetch_13f
 from digest.fetchers.news import fetch_news
 from digest.fetchers.crypto import fetch_crypto_deltas
 from digest.fetchers.commodities import fetch_commodities
+from digest.fetchers.feeds import fetch_feed_news
 
 # Registry maps source name (from sources.yaml) to callable fetcher info.
 # Each entry: { "fn": callable, "scope": "per_entity" | "global" }
@@ -25,6 +26,10 @@ FETCHER_REGISTRY = {
     },
     "commodities": {
         "fn": fetch_commodities,
+        "scope": "global",
+    },
+    "feeds": {
+        "fn": fetch_feed_news,
         "scope": "global",
     },
 }
