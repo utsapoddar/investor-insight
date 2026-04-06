@@ -1,6 +1,6 @@
 """
 Publish the weekly digest to the alpha-digest GitHub Pages repo.
-Works both locally and in GitHub Actions (uses GITHUB_TOKEN for push).
+Works both locally and in GitHub Actions (uses ALPHA_DIGEST_TOKEN for push).
 """
 import os
 import subprocess
@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-from digest.config import TEMPLATES_DIR, GITHUB_TOKEN
+from digest.config import TEMPLATES_DIR, ALPHA_DIGEST_TOKEN
 
 
 def publish_to_demo_repo(html_body: str, start_date: str, end_date: str, repo_slug: str = "utsapoddar/alpha-digest", web_html: str | None = None):
@@ -17,8 +17,8 @@ def publish_to_demo_repo(html_body: str, start_date: str, end_date: str, repo_sl
     Args:
         repo_slug: GitHub owner/repo (default: utsapoddar/alpha-digest)
     """
-    if GITHUB_TOKEN:
-        clone_url = f"https://x-access-token:{GITHUB_TOKEN}@github.com/{repo_slug}.git"
+    if ALPHA_DIGEST_TOKEN:
+        clone_url = f"https://x-access-token:{ALPHA_DIGEST_TOKEN}@github.com/{repo_slug}.git"
     else:
         clone_url = f"https://github.com/{repo_slug}.git"
 

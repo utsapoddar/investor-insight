@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).parent.parent
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")  # for publishing to alpha-digest repo
+ALPHA_DIGEST_TOKEN = os.environ.get("ALPHA_DIGEST_TOKEN", "")  # PAT for publishing to alpha-digest repo
 
 # --- Paths ---
 WATCHLIST_PATH = BASE_DIR / "watchlist.csv"
