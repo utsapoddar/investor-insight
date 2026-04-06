@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investor Insight — Week of {{ start_date }}</title>
+<style>
+  body { font-family: Georgia, serif; background: #eef0f3; color: #1a1a1a; margin: 0; padding: 0; }
+  .wrapper { max-width: 680px; margin: 30px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .header { background: #1a1a2e; color: #fff; padding: 28px 32px; }
+  .header h1 { margin: 0; font-size: 22px; font-weight: normal; letter-spacing: 0.5px; }
+  .header p { margin: 6px 0 0; color: #aaa; font-size: 13px; }
+  .macro { background: #f0f4ff; border-left: 4px solid #3b5bdb; padding: 14px 20px; margin: 0; font-size: 14px; color: #2d3a6b; }
+  .commodities { padding: 12px 32px; background: #fafafa; border-bottom: 1px solid #eee; font-size: 13px; color: #555; }
+  .commodities span { margin-right: 18px; }
+  .commodities .up { color: #2f9e44; font-weight: bold; }
+  .commodities .down { color: #c92a2a; font-weight: bold; }
+  .content { padding: 24px 32px; }
+  .entity { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #eee; }
+  .entity:last-child { border-bottom: none; }
+  .entity-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .entity-name { font-size: 17px; font-weight: bold; color: #1a1a2e; }
+  .entity-type { font-size: 11px; background: #e8f0fe; color: #1a56db; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; font-weight: 600; }
+  .summary { font-size: 15px; line-height: 1.7; color: #333; }
+  .news-links { margin-top: 10px; font-size: 12px; }
+  .news-links a { color: #3b5bdb; text-decoration: none; margin-right: 10px; }
+  .news-links a:hover { text-decoration: underline; }
+  .footer { background: #fafafa; border-top: 1px solid #eee; padding: 16px 32px; font-size: 12px; color: #999; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <h1>Investor Insight</h1>
+    <p>Weekly digest &mdash; {{ start_date }} to {{ end_date }}</p>
+  </div>
+
+  {% if macro_note %}
+  <div class="macro">
+    <strong>Macro this week:</strong> {{ macro_note }}
+  </div>
+  {% endif %}
+
+  {% if commodities %}
+  <div class="commodities">
+    {% for name, pct in commodities.items() %}
+    <span>{{ name }}: <span class="{{ 'up' if pct >= 0 else 'down' }}">{{ '%+.2f' % pct }}%</span></span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="content">
+    {% for entity in entity_summaries %}
+    <div class="entity">
+      <div class="entity-header">
+        <span class="entity-name">{{ entity.name }}</span>
+        <span class="entity-type">{{ entity.type }}</span>
+      </div>
+      <div class="summary">{{ entity.summary }}</div>
+      {% if entity.news_used %}
+      <div class="news-links">
+        Sources:
+        {% for url in entity.news_used %}
+        <a href="{{ url }}" target="_blank">Article {{ loop.index }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <p style="color:#888;">No significant activity detected this week.</p>
+    {% endfor %}
+  </div>
+
+  <div class="footer">
+    This digest is for informational purposes only and does not constitute investment advice.<br>
+    Data sources: SEC EDGAR, CoinGecko, Yahoo Finance, Google News.
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Data source configuration for Alpha Digest
+# Each source maps to a fetcher module in digest/fetchers/
+# To add a new source: create a fetcher in digest/fetchers/, then add it here.
+
+fetchers:
+  sec_edgar:
+    enabled: true
+    description: "SEC EDGAR Form 4 + 13F filings"
+
+  news:
+    enabled: true
+    description: "Google News RSS headlines per entity"
+
+  crypto:
+    enabled: true
+    description: "CoinGecko corporate crypto treasury tracker"
+
+  commodities:
+    enabled: true
+    description: "Yahoo Finance weekly commodity price changes"
+
+# Commodity symbols tracked (fetcher: commodities)
+commodities:
+  Gold: "GC=F"
+  "Oil (WTI)": "CL=F"
+  Silver: "SI=F"
