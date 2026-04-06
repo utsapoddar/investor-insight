@@ -1,4 +1,13 @@
 name,url,type
+MarketWatch Top Stories,https://feeds.marketwatch.com/marketwatch/topstories,rss
+CNBC Top News,https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114,rss
+WSJ Markets,https://feeds.a.dj.com/rss/RSSMarketsMain.xml,rss
+Seeking Alpha,https://seekingalpha.com/market_currents.xml,rss
+Investor Business Daily,https://www.investors.com/feed/,rss
+Benzinga,https://www.benzinga.com/feed,rss
+The Motley Fool,https://www.fool.com/feeds/index.aspx,rss
+Bloomberg Markets,https://feeds.bloomberg.com/markets/news.rss,rss
+Financial Times,https://www.ft.com/rss/home,rss
+Yahoo Finance,https://finance.yahoo.com/news/rssindex,rss
 r/investing,https://www.reddit.com/r/investing/.rss,rss
-r/wallstreetbets,https://www.reddit.com/r/wallstreetbets/.rss,rss
 r/SecurityAnalysis,https://www.reddit.com/r/SecurityAnalysis/.rss,rss
