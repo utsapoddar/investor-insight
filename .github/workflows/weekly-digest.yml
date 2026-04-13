@@ -2,8 +2,8 @@ name: Alpha Digest — Weekly Pipeline
 
 on:
   schedule:
-    # Every Monday at 10:00 UTC (6:00 AM ET)
-    - cron: '0 10 * * 1'
+    # Every Monday at 10:17 UTC (6:17 AM ET) — off-hour minute to avoid Actions scheduler throttling
+    - cron: '17 10 * * 1'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
