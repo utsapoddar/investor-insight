@@ -4,7 +4,7 @@ import json
 from openai import OpenAI
 from digest.config import NVIDIA_API_KEY
 
-MODEL = "openai/gpt-oss-120b"
+MODEL = "mistralai/mistral-medium-3.5-128b"
 
 SYSTEM_PROMPT = """You are a careful investment analyst writing a weekly Alpha Digest for retail investors.
 
@@ -66,4 +66,6 @@ Write the digest now using only the data above."""
     )
 
     content = response.choices[0].message.content
+    if content is None or not content.strip():
+        raise RuntimeError(f"Empty completion from {MODEL} (finish_reason={response.choices[0].finish_reason})")
     return json.loads(content)

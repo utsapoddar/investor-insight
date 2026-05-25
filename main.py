@@ -106,7 +106,7 @@ def main(dry_run: bool = False):
     enriched = enrich(form4_trades, thirteenf_results, crypto_deltas, news_by_entity)
 
     # --- Summarize ---
-    print("[main] Calling Groq for summarization...")
+    print("[main] Calling NVIDIA for summarization...")
     summary = summarize(enriched, commodities, start_str, end_str)
 
     # --- Render ---
