@@ -1,26 +1,27 @@
-"""Summarize enriched data using Groq (Llama 3.3 70B)."""
+"""Summarize enriched data using NVIDIA NIM."""
 import json
 
-from groq import Groq
-from digest.config import GROQ_API_KEY
+from openai import OpenAI
+from digest.config import NVIDIA_API_KEY
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 
-SYSTEM_PROMPT = """You are an investment analyst writing a weekly digest for retail investors.
+SYSTEM_PROMPT = """You are a careful investment analyst writing a weekly Alpha Digest for retail investors.
 
-For each entity in the data provided, write 2-4 sentences covering:
-1. What they did (bought/sold/added/reduced position, assets and approximate size)
-2. Why it likely happened (connect to provided news headlines; if no news say "no public context found this week")
-3. What it might signal (brief, neutral — do NOT give investment advice)
+For each entity in the provided data, write a plain-English summary of 2-4 sentences that covers:
+1. WHAT changed: direction and approximate size of the insider trade, 13F position change, crypto treasury change, or other reported activity.
+2. LIKELY WHY: ground the explanation only in the provided news and fields. If no public context is provided, say "no public context found this week".
+3. NEUTRAL SIGNAL: briefly explain what the activity may indicate without hype and without investment advice.
 
 Rules:
-- Be factual and concise. No hype or speculation.
-- Use plain English, no jargon without explanation.
-- Never invent information not in the provided data.
-- If a 13F shows no changes, say so in one sentence.
-- If an entity had no activity this week, write one sentence saying so.
+- Never invent tickers, figures, dates, entities, news, links, or facts not present in the input data.
+- If a field or section is empty, say so in one concise sentence rather than fabricating context.
+- Use only the provided news URLs in news_used.
+- Be factual and concise. Use plain English, no jargon without explanation, no hype.
+- Do not recommend buying, selling, holding, or timing any security.
+- If a 13F shows no changes, say so in one sentence. If an entity had no activity this week, say so in one sentence.
 
-Respond ONLY with valid JSON matching this exact schema:
+Respond with a single valid JSON object only. Do not include markdown, code fences, or prose outside JSON. The JSON must match this exact schema and must not add, remove, or rename keys:
 {
   "entity_summaries": [
     {
@@ -35,9 +36,9 @@ Respond ONLY with valid JSON matching this exact schema:
 
 
 def summarize(enriched: dict, commodities: dict[str, float], start_date: str, end_date: str) -> dict:
-    client = Groq(api_key=GROQ_API_KEY)
+    client = OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=NVIDIA_API_KEY)
 
-    user_prompt = f"""Week of {start_date} to {end_date}.
+    user_prompt = f"""Analyze the week of {start_date} to {end_date}.
 
 === INSIDER TRADES (Form 4) ===
 {json.dumps(enriched["trades"], indent=2, default=str)}
@@ -51,7 +52,7 @@ def summarize(enriched: dict, commodities: dict[str, float], start_date: str, en
 === COMMODITY PRICES THIS WEEK ===
 {chr(10).join(f"{k}: {v:+.2f}%" for k, v in commodities.items()) if commodities else "No commodity data available."}
 
-Write the digest now."""
+Write the digest now using only the data above."""
 
     response = client.chat.completions.create(
         model=MODEL,
