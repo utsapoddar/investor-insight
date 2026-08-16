@@ -9,7 +9,10 @@ on:
 jobs:
   run-digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Data fetch runs ~5 min; summarization now retries up to 3x across 2 models at a
+    # 150s request timeout, so the worst case is ~20 min. At 15 the job was killed
+    # before the fallback model could be tried.
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
