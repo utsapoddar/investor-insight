@@ -5,7 +5,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 
 # --- Secrets (from env vars / GitHub secrets) ---
-NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")  # kept as cross-provider fallback
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 ALPHA_DIGEST_TOKEN = os.environ.get("ALPHA_DIGEST_TOKEN", "")  # PAT for publishing to alpha-digest repo

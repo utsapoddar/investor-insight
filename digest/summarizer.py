@@ -10,19 +10,29 @@ from openai import (
     OpenAI,
     RateLimitError,
 )
-from digest.config import NVIDIA_API_KEY
+from digest.config import GEMINI_API_KEY, NVIDIA_API_KEY
 
-# Probed against the live NIM catalogue 2026-08-16. The previous pin,
-# mistralai/mistral-medium-3.5-128b, reached end of life 2026-08-07 and returns HTTP
-# 410, which killed three consecutive weekly runs. openai/gpt-oss-120b — the obvious
-# revert — timed out at 90s, so it is not a safe primary.
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
+
+# Ordered (model, base_url, api_key) chain, tried in sequence. Every entry was verified
+# against a FULL 25-entity payload — finish_reason=stop, valid JSON, all 25 summaries.
+# A toy prompt is not sufficient evidence: mistralai/mistral-nemotron answered one in
+# 1.4s, then timed out and returned HTTP 500 on the real payload.
 #
-# The two below were verified against a FULL 25-entity payload, not a toy prompt: both
-# returned finish_reason=stop with all 25 entity_summaries. That distinction matters —
-# mistralai/mistral-nemotron answered a small probe in 1.4s but then timed out and
-# returned HTTP 500 on the real payload, so it is deliberately not listed here.
-MODEL = "nvidia/nemotron-3-super-120b-a12b"
-FALLBACK_MODELS = ("openai/gpt-oss-20b",)
+# The chain deliberately spans TWO PROVIDERS. Provider-level failure is the recurring
+# cause of outages here: Groq's token cap broke it 2026-05, NVIDIA end-of-lifed the
+# pinned model 2026-08-07 (HTTP 410, three dead runs), and on 2026-08-17 gemini-3.7-flash
+# and gemini-flash-latest were both returning 503 "high demand". Falling back within one
+# provider would not have survived any of those.
+#
+# Pinned versions, not the gemini-flash-latest alias: the alias was itself 503ing when
+# this was chosen, and an alias that silently changes model is its own failure mode.
+PROVIDERS = (
+    ("gemini-3.5-flash", GEMINI_BASE_URL, GEMINI_API_KEY),
+    ("gemini-3.1-flash-lite", GEMINI_BASE_URL, GEMINI_API_KEY),
+    ("nvidia/nemotron-3-super-120b-a12b", NVIDIA_BASE_URL, NVIDIA_API_KEY),
+)
 
 # The SDK default is 600s, which is longer than this job's entire budget: three
 # attempts across two models could blow the workflow timeout before the fallback is
@@ -84,13 +94,6 @@ Respond with a single valid JSON object only. Do not include markdown, code fenc
 
 
 def summarize(enriched: dict, commodities: dict[str, float], start_date: str, end_date: str) -> dict:
-    client = OpenAI(
-        base_url="https://integrate.api.nvidia.com/v1",
-        api_key=NVIDIA_API_KEY,
-        timeout=REQUEST_TIMEOUT_S,
-        max_retries=0,  # retries are handled below, per model, with backoff
-    )
-
     user_prompt = f"""Analyze the week of {start_date} to {end_date}.
 
 === INSIDER TRADES (Form 4) ===
@@ -107,8 +110,18 @@ def summarize(enriched: dict, commodities: dict[str, float], start_date: str, en
 
 Write the digest now using only the data above."""
 
+    primary_model = PROVIDERS[0][0]
     failures: list[str] = []
-    for model in (MODEL, *FALLBACK_MODELS):
+    for model, base_url, api_key in PROVIDERS:
+        if not api_key:
+            failures.append(f"{model}: skipped, no API key configured")
+            continue
+        client = OpenAI(
+            base_url=base_url,
+            api_key=api_key,
+            timeout=REQUEST_TIMEOUT_S,
+            max_retries=0,  # retries are handled below, per model, with backoff
+        )
         last_error: Exception | None = None
         for attempt in range(1, ATTEMPTS + 1):
             try:
@@ -129,8 +142,8 @@ Write the digest now using only the data above."""
                         f"Empty completion (finish_reason={response.choices[0].finish_reason})"
                     )
                 summary = json.loads(content)
-                if model != MODEL:
-                    print(f"  [summarizer] WARNING: primary {MODEL} unusable; produced digest with {model}")
+                if model != primary_model:
+                    print(f"  [summarizer] WARNING: primary {primary_model} unusable; produced digest with {model}")
                 return summary
             except RETRY_ON as exc:
                 # RateLimitError/InternalServerError are APIStatusError subclasses but are

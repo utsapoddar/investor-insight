@@ -9,10 +9,11 @@ on:
 jobs:
   run-digest:
     runs-on: ubuntu-latest
-    # Data fetch runs ~5 min; summarization now retries up to 3x across 2 models at a
-    # 150s request timeout, so the worst case is ~20 min. At 15 the job was killed
-    # before the fallback model could be tried.
-    timeout-minutes: 25
+    # Data fetch runs ~5 min; summarization retries up to 3x across 3 models (2 Gemini,
+    # 1 NVIDIA) at a 150s request timeout, so the true worst case is ~28 min. Typical is
+    # ~6 min. This must stay above the worst case: at 15 the job was killed before the
+    # fallback could be tried, which defeats the point of having one.
+    timeout-minutes: 35
 
     steps:
       - name: Checkout
@@ -36,6 +37,7 @@ jobs:
 
       - name: Run pipeline
         env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
