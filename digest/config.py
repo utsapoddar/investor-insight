@@ -24,8 +24,13 @@ CONFIG_DIR = BASE_DIR / "config"
 EDGAR_USER_AGENT = os.environ.get("EDGAR_USER_AGENT", "AlphaDigest contact@example.com")
 EDGAR_RATE_LIMIT_SLEEP = 0.15
 
-# --- Recipients (from yaml) ---
+# --- Recipients (DIGEST_RECIPIENTS env var, else local yaml) ---
+# The yaml holds real addresses and is gitignored, so CI supplies them via the
+# DIGEST_RECIPIENTS secret (comma-separated) instead.
 def load_recipients() -> list[str]:
+    env = os.environ.get("DIGEST_RECIPIENTS", "")
+    if env.strip():
+        return [r.strip() for r in env.split(",") if r.strip()]
     path = CONFIG_DIR / "recipients.yaml"
     if not path.exists():
         return []

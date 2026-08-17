@@ -1,0 +1,10 @@
+# Email recipients for Alpha Digest.
+#
+# Local runs: copy this file to `recipients.yaml` and fill in real addresses.
+# `recipients.yaml` is gitignored so addresses never reach the repo.
+#
+# CI: set the DIGEST_RECIPIENTS repository secret to a comma-separated list
+# instead — it takes precedence over this file.
+recipients:
+  - you@example.com
+  - someone-else@example.com
