@@ -1,5 +1,6 @@
 """
-Publish the weekly digest to the alpha-digest GitHub Pages repo.
+Publish the weekly digest to the gh-pages branch of this repo, which GitHub Pages
+serves at https://utsapoddar.github.io/alpha-digest/.
 Works both locally and in GitHub Actions (uses ALPHA_DIGEST_TOKEN for push).
 """
 import os
@@ -12,7 +13,9 @@ from digest.config import TEMPLATES_DIR, ALPHA_DIGEST_TOKEN
 
 
 def publish_to_demo_repo(html_body: str, start_date: str, end_date: str, repo_slug: str = "utsapoddar/alpha-digest", web_html: str | None = None):
-    """Clone the alpha-digest repo, update it, and push.
+    """Clone the published site branch, update it, and push.
+
+    The site lives on the gh-pages branch of this same repo; the pipeline code is on main.
 
     Args:
         repo_slug: GitHub owner/repo (default: utsapoddar/alpha-digest)
@@ -26,7 +29,10 @@ def publish_to_demo_repo(html_body: str, start_date: str, end_date: str, repo_sl
         repo = Path(tmpdir) / "alpha-digest"
 
         try:
-            subprocess.run(["git", "clone", clone_url, str(repo)], check=True, capture_output=True)
+            subprocess.run(
+                ["git", "clone", "--branch", "gh-pages", "--single-branch", clone_url, str(repo)],
+                check=True, capture_output=True,
+            )
         except subprocess.CalledProcessError as e:
             print(f"[publisher] Clone failed: {e.stderr.decode() if e.stderr else e}")
             return
@@ -79,7 +85,7 @@ def publish_to_demo_repo(html_body: str, start_date: str, end_date: str, repo_sl
                 ["git", "-C", str(repo), "commit", "-m", f"Weekly digest — {end_date}"],
                 check=True, capture_output=True,
             )
-            subprocess.run(["git", "-C", str(repo), "push"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", str(repo), "push", "origin", "gh-pages"], check=True, capture_output=True)
             print(f"[publisher] Published digest for {end_date} to GitHub Pages.")
         except subprocess.CalledProcessError as e:
             print(f"[publisher] Git error: {e.stderr.decode() if e.stderr else e}")
